@@ -1,6 +1,6 @@
 CREATE table dbo.Department(
 	DepartmentId int identity (1,1),
-	DepartnmentName nvarchar (500)
+	DepartmentName nvarchar (500)
 )
 
 insert into dbo.department values ('IT')
