@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Data;
-using System.Data.SqlClient;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
@@ -10,40 +8,18 @@ namespace WebApplication1.Controllers
     public class DepartmentController : ControllerBase
     {
 
-        private readonly IConfiguration _configuration;
+        private readonly mytestdbContext _dbContext;
 
-        public DepartmentController(IConfiguration configuration)
+        public DepartmentController(mytestdbContext dbContext)
         {
-            _configuration = configuration;
+            _dbContext = dbContext;
         }
 
-        [HttpGet(Name = "GetDepartments")]
-        public JsonResult Get()
+        [HttpGet]
+        public IActionResult Get()
         {
-            string query = @"
-                select DepartmentId, DepartmentName from
-                dbo.Department
-            ";
-
-            DataTable table = new DataTable();
-            string sqlDataSource = _configuration.GetConnectionString("EmployeeAppCon");
-
-            SqlDataReader myReader;
-
-            using(SqlConnection myCon = new SqlConnection(sqlDataSource))
-            {
-                myCon.Open();
-
-                using(SqlCommand myCommand = new SqlCommand(query, myCon))
-                {
-                    myReader = myCommand.ExecuteReader();
-                    table.Load(myReader);
-                    myReader.Close();
-                    myCon.Close();
-                }
-            }
-
-            return new JsonResult(table);
+            var data = _dbContext.Departments.ToList();
+            return Ok(data);
         }
     }
 }
