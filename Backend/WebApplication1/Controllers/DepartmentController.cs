@@ -16,51 +16,51 @@ namespace WebApplication1.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get()
+        public JsonResult Get()
         {
             var data = _dbContext.Departments.ToList();
-            return Ok(data);
+            return new JsonResult(data);
         }
 
         [HttpPost]
-        public IActionResult Post(Department Department)
+        public JsonResult Post(Department Department)
         {
             _dbContext.Departments.Add(Department);
             _dbContext.SaveChanges();
-            return CreatedAtAction(nameof(Get), new { id = Department.DepartmentId }, Department);
+            return new JsonResult($"Added {Department} successfully");
         }
 
 
         [HttpPut]
-        public IActionResult Put(Department Department)
+        public JsonResult Put(Department Department)
         {
             var existingDepartment = _dbContext.Departments.FirstOrDefault(d => d.DepartmentId == Department.DepartmentId);
 
             if (existingDepartment == null)
             {
-                return NotFound();
+                return new JsonResult($"No such department with Id: {Department.DepartmentId} was found");
             }
 
             _dbContext.Entry(existingDepartment).CurrentValues.SetValues(Department);
 
             _dbContext.SaveChanges();
 
-            return NoContent();
+            return new JsonResult($"Updated {Department}");
         }
 
         [HttpDelete]
-        public IActionResult Delete(int DepartmentId)
+        public JsonResult Delete(int DepartmentId)
         {
             var existingDepartment = _dbContext.Departments.FirstOrDefault(d => d.DepartmentId == DepartmentId);
 
             if (existingDepartment == null)
             {
-                return NotFound($"DepartmentId of {DepartmentId} was not found");
+                return new JsonResult($"Department with Id {DepartmentId} was not found");
             }
 
             _dbContext.Remove(existingDepartment);
             _dbContext.SaveChanges();
-            return NoContent();
+            return new JsonResult($"Deleted Department with id: {DepartmentId}");
         }
 
     }

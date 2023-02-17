@@ -8,58 +8,75 @@ namespace WebApplication1.Controllers
     public class EmployeeController : ControllerBase
     {
         private readonly mytestdbContext _dbContext;
-
-        public EmployeeController(mytestdbContext dbContext)
+        private readonly IWebHostEnvironment _env;
+        public EmployeeController(mytestdbContext dbContext, IWebHostEnvironment env)
         {
             _dbContext = dbContext;
+            _env = env;
         }
 
         [HttpGet]
-        public IActionResult Get()
+        public JsonResult Get()
         {
             var data = _dbContext.Employees.ToList();
-            return Ok(data);
+            return new JsonResult(data);
         }
 
         [HttpPost]
-        public IActionResult Post(Employee Employee)
+        public JsonResult Post(Employee Employee)
         {
             _dbContext.Employees.Add(Employee);
             _dbContext.SaveChanges();
-            return CreatedAtAction(nameof(Get), new { id = Employee.EmployeeId }, Employee);
+            return new JsonResult($"Added {Employee} successfully");
         }
 
 
         [HttpPut]
-        public IActionResult Put(Employee Employee)
+        public JsonResult Put(Employee Employee)
         {
             var existingEmployee = _dbContext.Employees.FirstOrDefault(d => d.EmployeeId == Employee.EmployeeId);
 
             if (existingEmployee == null)
             {
-                return NotFound();
+                 return new JsonResult($"No such Employee with Id: {Employee.EmployeeId} was found");
             }
 
             _dbContext.Entry(existingEmployee).CurrentValues.SetValues(Employee);
 
             _dbContext.SaveChanges();
 
-            return NoContent();
+            return new JsonResult($"Updated {Employee}");
         }
 
         [HttpDelete]
-        public IActionResult Delete(int EmployeeId)
+        public JsonResult Delete(int EmployeeId)
         {
             var existingEmployee = _dbContext.Employees.FirstOrDefault(d => d.EmployeeId == EmployeeId);
 
             if (existingEmployee == null)
             {
-                return NotFound($"EmployeeId of {EmployeeId} was not found");
+                return new JsonResult($"Employee with Id {EmployeeId} was not found");
             }
 
             _dbContext.Remove(existingEmployee);
             _dbContext.SaveChanges();
-            return NoContent();
+            return new JsonResult($"Deleted Employee with id: {EmployeeId}");
         }
+
+
+        [Route("UploadFile")]
+        [HttpPost]
+        public JsonResult UploadFile (IFormFile input)
+        {
+            var physicalPath = _env.ContentRootPath + "/Photos/" + input.FileName;
+
+            using (var stream = new FileStream(physicalPath, FileMode.Create))
+            {
+                input.CopyTo(stream);
+            }
+
+            return new JsonResult($"Added {input.FileName}");
+        }
+
     }
 }
